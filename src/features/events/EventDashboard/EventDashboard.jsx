@@ -9,7 +9,7 @@ const eventsDasboard = [
   {
     id: "1",
     title: "Trip to Tower of London",
-    date: "2018-03-27T11:00:00+00:00",
+    date: "2018-03-27",
     category: "culture",
     description:
       "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus sollicitudin " +
@@ -35,7 +35,7 @@ const eventsDasboard = [
   {
     id: "2",
     title: "Trip to Punch and Judy Pub",
-    date: "2018-03-28T14:00:00+00:00",
+    date: "2018-03-28",
     category: "drinks",
     description:
       "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus sollicitudin " +
@@ -70,7 +70,8 @@ class EventDashboard extends Component {
   //   };
   state = {
     events: eventsDasboard,
-    isOpen: false
+    isOpen: false,
+    selectedEvent: null
   };
   //this.handleFormOpen = this.handleFormOpen.bind(this);
   //this.handleCancel = this.handleCancel.bind(this);
@@ -78,6 +79,7 @@ class EventDashboard extends Component {
 
   handleFormOpen = () => {
     this.setState({
+      selectedEvent: null,
       isOpen: true
     });
   };
@@ -85,6 +87,26 @@ class EventDashboard extends Component {
   handleCancel = () => {
     this.setState({
       isOpen: false
+    });
+  };
+
+  handleUpdateEvent = updateEvent => {
+    this.setState({
+      events: this.state.events.map(event => {
+        if (event.id === updateEvent.id) {
+          return Object.assign({}, updateEvent);
+        } else {
+          return event;
+        }
+      }),
+      isOpen: false,
+      selectedEvent: null
+    });
+  };
+  handleOpenEvent = eventToOpen => () => {
+    this.setState({
+      selectedEvent: eventToOpen,
+      isOpen: true
     });
   };
 
@@ -97,11 +119,23 @@ class EventDashboard extends Component {
       isOpen: false
     });
   };
+
+  handleDeleteEvent = eventId => () => {
+    const updateEvents = this.state.events.filter(e => e.id !== eventId);
+    this.setState({
+      events: updateEvents
+    });
+  };
   render() {
+    const { selectedEvent } = this.state;
     return (
       <Grid>
         <Grid.Column width={10}>
-          <EventList events={this.state.events} />
+          <EventList
+            onEventOpen={this.handleOpenEvent}
+            events={this.state.events}
+            deleteEvents={this.handleDeleteEvent}
+          />
         </Grid.Column>
         <Grid.Column width={6}>
           <Button
@@ -111,6 +145,8 @@ class EventDashboard extends Component {
           />
           {this.state.isOpen && (
             <EventForm
+              updateEvent={this.handleUpdateEvent}
+              selectedEvent={selectedEvent}
               createEvent={this.handleCreateEvent}
               handleCancel={this.handleCancel}
             />
